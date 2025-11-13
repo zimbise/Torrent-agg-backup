@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.zim.tags'
+    namespace 'com.zim.tagg'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.zim.tags"
+        applicationId "com.zim.tagg"
         minSdk 24
         targetSdk 34
         versionCode 13
