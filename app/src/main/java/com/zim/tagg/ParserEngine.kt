@@ -18,7 +18,6 @@ class ParserEngine(private val provider: ProviderConfig) {
             val rows = doc.select(provider.listSelector)
             for (row in rows) {
                 val item = TorrentResult.fromElement(row, provider)
-                // Minimal validity check: must have a title
                 if (item.title.isNotBlank()) {
                     results.add(item)
                 }
