@@ -28,12 +28,21 @@ class ResultsAdapter(
 
         holder.line1.text = item.title
 
-        val details = mutableListOf<String>()
-        if (item.size.isNotBlank()) details.add("Size: ${item.size}")
-        if (item.seeders.isNotBlank()) details.add("Seeds: ${item.seeders}")
-        if (item.detailUrl.isNotBlank()) details.add("Link: ${item.detailUrl}")
+        val parts = mutableListOf<String>()
+        item.size?.takeIf { it.isNotBlank() }?.let { parts.add("Size: $it") }
+        item.seeds?.let { parts.add("Seeds: $it") }
+        item.leechers?.let { parts.add("Leech: $it") }
+        item.uploader?.takeIf { it.isNotBlank() }?.let { parts.add("By: $it") }
+        item.category?.takeIf { it.isNotBlank() }?.let { parts.add("Cat: $it") }
+        item.uploadDate?.takeIf { it.isNotBlank() }?.let { parts.add("Date: $it") }
 
-        holder.line2.text = details.joinToString(" | ")
+        // Show magnet or detail url if available
+        when {
+            !item.magnet.isNullOrBlank() -> parts.add("Magnet ✓")
+            !item.detailUrl.isNullOrBlank() -> parts.add("Link ✓")
+        }
+
+        holder.line2.text = parts.joinToString(" | ")
     }
 
     fun updateData(newResults: List<TorrentResult>) {
