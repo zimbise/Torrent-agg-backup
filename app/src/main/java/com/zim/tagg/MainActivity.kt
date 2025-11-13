@@ -18,8 +18,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Use the correct class name
-        LocalProviderStorage.bootstrapFromAssets(this)
+        // Bootstrap providers.json from assets if needed
+        LocalProviderStore.bootstrapFromAssets(this)
 
         resultsRecycler = findViewById(R.id.resultsRecycler)
         resultsRecycler.layoutManager = LinearLayoutManager(this)
@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     private fun runSearch(query: String) {
         resultsList.clear()
 
-        val arr: JSONArray = LocalProviderStorage.load(this) ?: JSONArray()
+        val arr: JSONArray = LocalProviderStore.load(this) ?: JSONArray()
 
         for (i in 0 until arr.length()) {
             val providerJson = arr.getJSONObject(i)
