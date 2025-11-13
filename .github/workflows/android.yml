@@ -2,26 +2,53 @@ name: Android CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout source
+      # Checkout your repository
+      - name: Checkout code
         uses: actions/checkout@v4
+
+      # Set up JDK 17 (required for AGP 8+)
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
           distribution: 'temurin'
+          java-version: '17'
+
+      # Cache Gradle dependencies
+      - name: Cache Gradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # Ensure Gradlew is executable
       - name: Grant execute permission for Gradlew
         run: chmod +x gradlew
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
-      - name: Upload APK Artifact
+
+      # Run a clean build
+      - name: Clean and build Debug APK
+        run: ./gradlew clean assembleDebug
+
+      # Upload the built APK as an artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: TorrentAgg-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
