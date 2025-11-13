@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainLayout"
     android:orientation="vertical"
     android:padding="12dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- Search input -->
     <EditText
         android:id="@+id/searchBox"
-        android:hint="@string/search_hint"
+        android:hint="Enter search query"
         android:imeOptions="actionSearch"
         android:inputType="text"
         android:singleLine="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <!-- Search button -->
     <Button
         android:id="@+id/btnSearch"
         android:layout_width="match_parent"
@@ -21,6 +24,7 @@
         android:text="Search"
         android:layout_marginTop="8dp" />
 
+    <!-- Manage Providers button -->
     <Button
         android:id="@+id/btnManageProviders"
         android:layout_width="match_parent"
@@ -29,6 +33,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp" />
 
+    <!-- Results list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/resultsList"
         android:layout_width="match_parent"
