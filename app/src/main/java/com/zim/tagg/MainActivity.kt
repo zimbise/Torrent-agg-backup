@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONArray
-import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,7 +18,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Make sure providers.json exists
         LocalProviderStore.bootstrapFromAssets(this)
 
         resultsRecycler = findViewById(R.id.resultsRecycler)
@@ -49,6 +47,6 @@ class MainActivity : AppCompatActivity() {
             resultsList.addAll(providerResults)
         }
 
-        resultsAdapter.notifyDataSetChanged()
+        resultsAdapter.updateData(resultsList)
     }
 }
