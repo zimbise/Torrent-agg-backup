@@ -28,7 +28,7 @@ class ResultsAdapter(private var items: List<TorrentResult>) :
         holder.meta.text = buildMeta(item)
 
         holder.itemView.setOnClickListener {
-            item.magnet.takeIf { it.startsWith("magnet:") }?.let { magnet ->
+            item.magnet?.takeIf { it.startsWith("magnet:") }?.let { magnet ->
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(magnet))
                 holder.itemView.context.startActivity(intent)
             }
