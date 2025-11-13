@@ -31,7 +31,9 @@ class MainActivity : AppCompatActivity() {
         resultsList.adapter = adapter
 
         parser = ParserEngine()
-        loadRegistry()
+
+        // Load providers from registry or fallback
+        loadProviders()
 
         searchBox.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
@@ -70,9 +72,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadRegistry() {
+    private fun loadProviders() {
+        // Try registry/provider.json first
         try {
-            val input: InputStream = assets.open("providers/registry.json")
+            val input: InputStream = assets.open("registry/provider.json")
             val text = input.bufferedReader().use { it.readText() }
             val registry = JSONArray(text)
             for (i in 0 until registry.length()) {
@@ -81,9 +84,24 @@ class MainActivity : AppCompatActivity() {
                 val providerJson = loadProvider(fileName)
                 providerList.add(providerJson)
             }
+            Log.i("RegistryLoad", "Loaded ${providerList.size} providers from registry")
+            return
         } catch (e: Exception) {
-            Log.e("RegistryLoad", "Failed to load registry", e)
-            Toast.makeText(this, "Registry load failed", Toast.LENGTH_LONG).show()
+            Log.w("RegistryLoad", "No registry/provider.json found, falling back", e)
+        }
+
+        // Fallback: scan providers folder
+        try {
+            val providerFiles = assets.list("providers") ?: emptyArray()
+            for (fileName in providerFiles) {
+                if (fileName.endsWith(".json")) {
+                    val providerJson = loadProvider(fileName)
+                    providerList.add(providerJson)
+                }
+            }
+            Log.i("RegistryLoad", "Loaded ${providerList.size} providers from providers folder")
+        } catch (e: Exception) {
+            Log.e("RegistryLoad", "Failed to scan providers folder", e)
         }
     }
 
