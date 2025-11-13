@@ -14,11 +14,12 @@ class ProviderAdapter(
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(android.R.id.text1)
+        val subtitle: TextView = view.findViewById(android.R.id.text2)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(android.R.layout.simple_list_item_1, parent, false)
+            .inflate(android.R.layout.simple_list_item_2, parent, false)
         return ViewHolder(view)
     }
 
@@ -26,7 +27,13 @@ class ProviderAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val provider = providers[position]
-        holder.title.text = provider.optString("name")
+        val name = provider.optString("name")
+        val searchUrl = provider.optString("searchUrl")
+        val listSelector = provider.optString("listSelector")
+
+        holder.title.text = name
+        holder.subtitle.text = "URL: $searchUrl\nSelector: $listSelector"
+
         holder.itemView.setOnClickListener { onClick(provider) }
     }
 
