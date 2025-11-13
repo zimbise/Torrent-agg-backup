@@ -11,21 +11,23 @@ import org.json.JSONObject
 
 class ProviderManagerActivity : AppCompatActivity() {
 
-    private lateinit var providerList: MutableList<JSONObject>
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: ProviderAdapter // assume you have a simple adapter
+    private lateinit var adapter: ProviderAdapter
+    private val providerList = mutableListOf<JSONObject>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         recyclerView = RecyclerView(this).apply {
             layoutManager = LinearLayoutManager(this@ProviderManagerActivity)
         }
         setContentView(recyclerView)
 
-        providerList = mutableListOf()
         loadProviders()
 
-        adapter = ProviderAdapter(providerList) { showEditProviderDialog(it) }
+        adapter = ProviderAdapter(providerList) { provider ->
+            showEditProviderDialog(provider)
+        }
         recyclerView.adapter = adapter
     }
 
