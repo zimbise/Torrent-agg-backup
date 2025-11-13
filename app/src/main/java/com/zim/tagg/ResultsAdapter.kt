@@ -36,7 +36,6 @@ class ResultsAdapter(
         item.category?.takeIf { it.isNotBlank() }?.let { parts.add("Cat: $it") }
         item.uploadDate?.takeIf { it.isNotBlank() }?.let { parts.add("Date: $it") }
 
-        // Show magnet or detail url if available
         when {
             !item.magnet.isNullOrBlank() -> parts.add("Magnet ✓")
             !item.detailUrl.isNullOrBlank() -> parts.add("Link ✓")
