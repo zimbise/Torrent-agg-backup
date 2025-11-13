@@ -1,39 +1,39 @@
 package com.zim.tagg
 
-import android.util.Log
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.jsoup.Jsoup
 import org.json.JSONObject
+import org.jsoup.Jsoup
 
-class ParserEngine(private val client: OkHttpClient = OkHttpClient()) {
+class ParserEngine(private val provider: JSONObject) {
 
-    fun search(providerJson: JSONObject, query: String): List<TorrentResult> {
+    fun search(query: String): List<TorrentResult> {
         val results = mutableListOf<TorrentResult>()
-        val providerConfig = ProviderConfigFactory.fromJson(providerJson)
-        val name = providerConfig.name
 
         try {
-            val url = providerConfig.searchUrl.replace("{query}", query)
-            Log.d("ParserEngine", "[$name] URL: $url")
+            val searchUrl = provider.optString("searchUrl").replace("{query}", query)
+            val doc = Jsoup.connect(searchUrl).get()
+            val listSelector = provider.optString("listSelector")
 
-            val response = client.newCall(Request.Builder().url(url).build()).execute()
-            val html = response.body?.string().orEmpty()
-            if (html.isEmpty()) return emptyList()
+            val rows = doc.select(listSelector)
+            val fields = provider.optJSONObject("fields") ?: JSONObject()
 
-            val doc = Jsoup.parse(html)
-            val elements = doc.select(providerConfig.listSelector)
-            Log.d("ParserEngine", "[$name] Elements found: ${elements.size}")
+            for (row in rows) {
+                val titleSel = fields.optJSONObject("title")?.optString("selector") ?: ""
+                val detailSel = fields.optJSONObject("detailUrl")?.optString("selector") ?: ""
+                val detailAttr = fields.optJSONObject("detailUrl")?.optString("attr") ?: "href"
+                val seedsSel = fields.optJSONObject("seeders")?.optString("selector") ?: ""
+                val sizeSel = fields.optJSONObject("size")?.optString("selector") ?: ""
 
-            for (el in elements) {
-                try {
-                    results.add(TorrentResult.fromElement(el, providerConfig))
-                } catch (inner: Exception) {
-                    Log.w("ParserEngine", "[$name] Element parse failed: ${inner.message}")
+                val title = row.select(titleSel).text()
+                val detailUrl = row.select(detailSel).attr(detailAttr)
+                val seeds = row.select(seedsSel).text()
+                val size = row.select(sizeSel).text()
+
+                if (title.isNotBlank()) {
+                    results.add(TorrentResult(title, detailUrl, seeds, size))
                 }
             }
         } catch (e: Exception) {
-            Log.e("ParserEngine", "[$name] Search failed: ${e.message}")
+            e.printStackTrace()
         }
 
         return results
