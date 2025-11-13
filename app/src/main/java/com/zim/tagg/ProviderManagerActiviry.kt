@@ -23,6 +23,9 @@ class ProviderManagerActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.providerRecycler)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
+        // Bootstrap providers.json from assets if not present
+        LocalProviderStore.bootstrapFromAssets(this)
+
         loadProviders()
 
         adapter = ProviderAdapter(providerList) { provider ->
