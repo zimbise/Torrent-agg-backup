@@ -1,8 +1,10 @@
 package com.zim.tagg
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.inputmethod.EditorInfo
+import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +27,7 @@ class MainActivity : AppCompatActivity() {
 
         val searchBox = findViewById<EditText>(R.id.searchBox)
         val resultsList = findViewById<RecyclerView>(R.id.resultsList)
+        val manageBtn = findViewById<Button>(R.id.btnManageProviders)
 
         resultsList.layoutManager = LinearLayoutManager(this)
         adapter = ResultsAdapter(emptyList())
@@ -32,8 +35,13 @@ class MainActivity : AppCompatActivity() {
 
         parser = ParserEngine()
 
-        // Load providers from registry or fallback
+        // Load providers from local store, registry, or fallback
         loadProviders()
+
+        // Launch Provider Manager
+        manageBtn?.setOnClickListener {
+            startActivity(Intent(this, ProviderManagerActivity::class.java))
+        }
 
         searchBox.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
@@ -56,7 +64,15 @@ class MainActivity : AppCompatActivity() {
                                 val results: List<TorrentResult> = parser.search(provider, query)
                                 synchronized(allResults) { allResults.addAll(results) }
                                 withContext(Dispatchers.Main) {
-                                    adapter.updateData(allResults)
+                                    if (allResults.isEmpty()) {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "No results found for \"$query\"",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        adapter.updateData(allResults)
+                                    }
                                 }
                             } catch (e: Exception) {
                                 Log.e("SearchError", "Provider failed: ${provider.optString("name")}", e)
@@ -73,7 +89,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadProviders() {
-        // Try registry/provider.json first
+        // 1) Try local registry first
+        LocalProviderStore.load(this)?.let { registry ->
+            providerList.clear()
+            for (i in 0 until registry.length()) {
+                providerList.add(registry.getJSONObject(i))
+            }
+            Log.i("RegistryLoad", "Loaded ${providerList.size} providers from local storage")
+            return
+        }
+
+        // 2) Try registry/provider.json
         try {
             val input: InputStream = assets.open("registry/provider.json")
             val text = input.bufferedReader().use { it.readText() }
@@ -90,7 +116,7 @@ class MainActivity : AppCompatActivity() {
             Log.w("RegistryLoad", "No registry/provider.json found, falling back", e)
         }
 
-        // Fallback: scan providers folder
+        // 3) Fallback: scan providers folder
         try {
             val providerFiles = assets.list("providers") ?: emptyArray()
             for (fileName in providerFiles) {
