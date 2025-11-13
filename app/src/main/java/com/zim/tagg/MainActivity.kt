@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
                     providerList.forEach { provider ->
                         launch(Dispatchers.IO) {
                             try {
-                                val results = parser.search(provider, query)
+                                val results: List<TorrentResult> = parser.search(provider, query)
                                 synchronized(allResults) { allResults.addAll(results) }
                                 withContext(Dispatchers.Main) {
                                     adapter.updateData(allResults)
