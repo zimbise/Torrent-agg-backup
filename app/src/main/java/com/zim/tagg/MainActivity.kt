@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Ensure providers.json exists in internal storage (bootstrap from assets)
+        // Use the correct class name
         LocalProviderStorage.bootstrapFromAssets(this)
 
         resultsRecycler = findViewById(R.id.resultsRecycler)
@@ -44,12 +44,9 @@ class MainActivity : AppCompatActivity() {
 
         for (i in 0 until arr.length()) {
             val providerJson = arr.getJSONObject(i)
-
-            // Convert JSON to ProviderConfig and run engine
             val providerCfg = ProviderConfigFactory.fromJson(providerJson)
             val engine = ParserEngine(providerCfg)
             val providerResults = engine.search(query)
-
             resultsList.addAll(providerResults)
         }
 
