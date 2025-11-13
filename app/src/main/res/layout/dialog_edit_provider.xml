@@ -9,8 +9,44 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <EditText android:id="@+id/edName" android:hint="Provider Name"
-            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <EditText android:id="@+id/edName"
+            android:hint="Provider Name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
-        <EditText android:id="@+id/edSearchUrl" android:hint="Search URL"
-            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <EditText android:id="@+id/edSearchUrl"
+            android:hint="Search URL"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText android:id="@+id/edListSelector"
+            android:hint="List Selector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText android:id="@+id/edTitleSelector"
+            android:hint="Title Selector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText android:id="@+id/edDetailSelector"
+            android:hint="Detail Selector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText android:id="@+id/edDetailAttr"
+            android:hint="Detail Attr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText android:id="@+id/edSeedsSelector"
+            android:hint="Seeds Selector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText android:id="@+id/edSizeSelector"
+            android:hint="Size Selector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+</ScrollView>
