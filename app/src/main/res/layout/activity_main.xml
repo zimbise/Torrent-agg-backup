@@ -5,17 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Search input -->
     <EditText
         android:id="@+id/searchBox"
         android:hint="@string/search_hint"
         android:imeOptions="actionSearch"
+        android:inputType="text"
         android:singleLine="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text" />
+        android:layout_height="wrap_content" />
 
-    <!-- Manage Providers button -->
+    <Button
+        android:id="@+id/btnSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Search"
+        android:layout_marginTop="8dp" />
+
     <Button
         android:id="@+id/btnManageProviders"
         android:layout_width="match_parent"
@@ -24,7 +29,6 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp" />
 
-    <!-- Results list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/resultsList"
         android:layout_width="match_parent"
