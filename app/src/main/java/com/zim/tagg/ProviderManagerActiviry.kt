@@ -1,6 +1,7 @@
 package com.zim.tagg
 
 import android.os.Bundle
+import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -17,11 +18,10 @@ class ProviderManagerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_provider_manager)
 
-        recyclerView = RecyclerView(this).apply {
-            layoutManager = LinearLayoutManager(this@ProviderManagerActivity)
-        }
-        setContentView(recyclerView)
+        recyclerView = findViewById(R.id.providerRecycler)
+        recyclerView.layoutManager = LinearLayoutManager(this)
 
         loadProviders()
 
@@ -29,6 +29,11 @@ class ProviderManagerActivity : AppCompatActivity() {
             showEditProviderDialog(provider)
         }
         recyclerView.adapter = adapter
+
+        val btnAddProvider = findViewById<Button>(R.id.btnAddProvider)
+        btnAddProvider.setOnClickListener {
+            showEditProviderDialog(null) // add new provider
+        }
     }
 
     private fun loadProviders() {
@@ -51,7 +56,6 @@ class ProviderManagerActivity : AppCompatActivity() {
         val edSeedsSelector = dialogView.findViewById<EditText>(R.id.edSeedsSelector)
         val edSizeSelector = dialogView.findViewById<EditText>(R.id.edSizeSelector)
 
-        // Pre-fill if editing
         existing?.let {
             edName.setText(it.optString("name"))
             edSearchUrl.setText(it.optString("searchUrl"))
