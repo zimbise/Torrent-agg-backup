@@ -13,4 +13,11 @@
         android:id="@+id/btnReloadIntoApp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Save providers to local registry"
+        android:text="Save providers to local registry" />
+
+    <ListView
+        android:id="@+id/providerList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>
