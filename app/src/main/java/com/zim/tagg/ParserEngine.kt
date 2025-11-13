@@ -3,33 +3,24 @@ package com.zim.tagg
 import org.json.JSONObject
 import org.jsoup.Jsoup
 
-class ParserEngine(private val provider: JSONObject) {
+class ParserEngine(private val provider: ProviderConfig) {
 
     fun search(query: String): List<TorrentResult> {
         val results = mutableListOf<TorrentResult>()
 
         try {
-            val searchUrl = provider.optString("searchUrl").replace("{query}", query)
-            val doc = Jsoup.connect(searchUrl).get()
-            val listSelector = provider.optString("listSelector")
+            val url = provider.searchUrl.replace("{query}", query)
+            val doc = Jsoup.connect(url)
+                .userAgent("Mozilla/5.0 (Android) Tagg/1.0")
+                .timeout(20_000)
+                .get()
 
-            val rows = doc.select(listSelector)
-            val fields = provider.optJSONObject("fields") ?: JSONObject()
-
+            val rows = doc.select(provider.listSelector)
             for (row in rows) {
-                val titleSel = fields.optJSONObject("title")?.optString("selector") ?: ""
-                val detailSel = fields.optJSONObject("detailUrl")?.optString("selector") ?: ""
-                val detailAttr = fields.optJSONObject("detailUrl")?.optString("attr") ?: "href"
-                val seedsSel = fields.optJSONObject("seeders")?.optString("selector") ?: ""
-                val sizeSel = fields.optJSONObject("size")?.optString("selector") ?: ""
-
-                val title = row.select(titleSel).text()
-                val detailUrl = row.select(detailSel).attr(detailAttr)
-                val seeders = row.select(seedsSel).text()
-                val size = row.select(sizeSel).text()
-
-                if (title.isNotBlank()) {
-                    results.add(TorrentResult(title, detailUrl, seeders, size))
+                val item = TorrentResult.fromElement(row, provider)
+                // Minimal validity check: must have a title
+                if (item.title.isNotBlank()) {
+                    results.add(item)
                 }
             }
         } catch (e: Exception) {
@@ -37,5 +28,12 @@ class ParserEngine(private val provider: JSONObject) {
         }
 
         return results
+    }
+
+    companion object {
+        fun fromJson(json: JSONObject): ParserEngine {
+            val cfg = ProviderConfigFactory.fromJson(json)
+            return ParserEngine(cfg)
+        }
     }
 }
