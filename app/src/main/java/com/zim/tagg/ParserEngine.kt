@@ -25,11 +25,11 @@ class ParserEngine(private val provider: JSONObject) {
 
                 val title = row.select(titleSel).text()
                 val detailUrl = row.select(detailSel).attr(detailAttr)
-                val seeds = row.select(seedsSel).text()
+                val seeders = row.select(seedsSel).text()
                 val size = row.select(sizeSel).text()
 
                 if (title.isNotBlank()) {
-                    results.add(TorrentResult(title, detailUrl, seeds, size))
+                    results.add(TorrentResult(title, detailUrl, seeders, size))
                 }
             }
         } catch (e: Exception) {
