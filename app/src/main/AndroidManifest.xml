@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.zim.tagg">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Allow network access -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -11,7 +13,9 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
         <!-- Main entry point -->
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -19,7 +23,9 @@
         </activity>
 
         <!-- Provider Manager screen -->
-        <activity android:name=".ProviderManagerActivity" />
+        <activity
+            android:name=".ProviderManagerActivity"
+            android:exported="false" />
 
     </application>
 </manifest>
