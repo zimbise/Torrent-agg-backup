@@ -1,75 +1,86 @@
-package com.zim.tagg
+                                            Toast.LENGTH_SHORT
+                 package com.zim.tagg
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.*
-import org.json.JSONArray
 import org.json.JSONObject
-import java.io.InputStream
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var searchBox: EditText
+    private lateinit var btnSearch: Button
+    private lateinit var btnManageProviders: Button
+    private lateinit var resultsList: RecyclerView
     private lateinit var adapter: ResultsAdapter
-    private lateinit var parser: ParserEngine
     private val providerList = mutableListOf<JSONObject>()
-    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val parser = ParserEngine()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val searchBox = findViewById<EditText>(R.id.searchBox)
-        val resultsList = findViewById<RecyclerView>(R.id.resultsList)
-        val manageBtn = findViewById<Button>(R.id.btnManageProviders)
+        searchBox = findViewById(R.id.searchBox)
+        btnSearch = findViewById(R.id.btnSearch)
+        btnManageProviders = findViewById(R.id.btnManageProviders)
+        resultsList = findViewById(R.id.resultsList)
 
-        resultsList.layoutManager = LinearLayoutManager(this)
         adapter = ResultsAdapter(emptyList())
         resultsList.adapter = adapter
+        resultsList.layoutManager = LinearLayoutManager(this)
 
-        parser = ParserEngine()
-
-        // Load providers from local store, registry, or fallback
         loadProviders()
 
-        // Launch Provider Manager
-        manageBtn?.setOnClickListener {
-            startActivity(Intent(this, ProviderManagerActivity::class.java))
+        // Keyboard search
+        searchBox.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                performSearch(searchBox.text.toString())
+                true
+            } else false
         }
 
-        searchBox.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
-                val query = searchBox.text.toString().trim()
-                if (query.isEmpty()) {
-                    Toast.makeText(this, "Enter a search term", Toast.LENGTH_SHORT).show()
-                    return@setOnEditorActionListener true
-                }
+        // Button search
+        btnSearch.setOnClickListener {
+            performSearch(searchBox.text.toString())
+        }
 
-                if (providerList.isEmpty()) {
-                    Toast.makeText(this, "No providers loaded", Toast.LENGTH_SHORT).show()
-                    return@setOnEditorActionListener true
-                }
+        btnManageProviders.setOnClickListener {
+            startActivity(Intent(this, ProviderManagerActivity::class.java))
+        }
+    }
 
-                scope.launch {
-                    val allResults = mutableListOf<TorrentResult>()
-                    providerList.forEach { provider ->
-                        launch(Dispatchers.IO) {
-                            try {
-                                val results: List<TorrentResult> = parser.search(provider, query)
-                                synchronized(allResults) { allResults.addAll(results) }
-                                withContext(Dispatchers.Main) {
-                                    if (allResults.isEmpty()) {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "No results found for \"$query\"",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+    private fun performSearch(query: String) {
+        val results = mutableListOf<TorrentResult>()
+        for (provider in providerList) {
+            results.addAll(parser.search(provider, query))
+        }
+        adapter.updateData(results)
+    }
+
+    private fun loadProviders() {
+        providerList.clear()
+        val configs = ProviderRegistry.load(this)
+        configs.forEach { config ->
+            val fieldsJson = JSONObject()
+            config.fields.forEach { (key, sel) ->
+                val obj = JSONObject()
+                obj.put("selector", sel.selector)
+                sel.attr?.let { obj.put("attr", it) }
+                fieldsJson.put(key, obj)
+            }
+            val providerJson = JSONObject()
+            providerJson.put("name", config.name)
+            providerJson.put("searchUrl", config.searchUrl)
+            providerJson.put("listSelector", config.listSelector)
+            providerJson.put("fields", fieldsJson)
+            providerList.add(providerJson)
+        }
+    }
+}                       ).show()
                                     } else {
                                         adapter.updateData(allResults)
                                     }
