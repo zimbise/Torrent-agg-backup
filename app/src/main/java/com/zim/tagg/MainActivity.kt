@@ -18,7 +18,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        LocalProviderStore.bootstrapFromAssets(this)
+        // Ensure providers.json exists in internal storage (bootstrap from assets)
+        LocalProviderStorage.bootstrapFromAssets(this)
 
         resultsRecycler = findViewById(R.id.resultsRecycler)
         resultsRecycler.layoutManager = LinearLayoutManager(this)
@@ -29,8 +30,8 @@ class MainActivity : AppCompatActivity() {
         val searchButton = findViewById<Button>(R.id.searchButton)
 
         searchButton.setOnClickListener {
-            val query = searchBox.text.toString()
-            if (query.isNotBlank()) {
+            val query = searchBox.text.toString().trim()
+            if (query.isNotEmpty()) {
                 runSearch(query)
             }
         }
@@ -39,11 +40,16 @@ class MainActivity : AppCompatActivity() {
     private fun runSearch(query: String) {
         resultsList.clear()
 
-        val arr = LocalProviderStore.load(this) ?: JSONArray()
+        val arr: JSONArray = LocalProviderStorage.load(this) ?: JSONArray()
+
         for (i in 0 until arr.length()) {
-            val provider = arr.getJSONObject(i)
-            val engine = ParserEngine(provider)
+            val providerJson = arr.getJSONObject(i)
+
+            // Convert JSON to ProviderConfig and run engine
+            val providerCfg = ProviderConfigFactory.fromJson(providerJson)
+            val engine = ParserEngine(providerCfg)
             val providerResults = engine.search(query)
+
             resultsList.addAll(providerResults)
         }
 
