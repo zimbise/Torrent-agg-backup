@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">TorrentAgg</string>
+    <string name="search_hint">Search torrents...</string>
+</resources>
