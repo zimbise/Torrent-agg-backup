@@ -1,11 +1,8 @@
 package com.zim.tagg
 
 import org.json.JSONObject
+import org.jsoup.nodes.Element
 
-/**
- * Core torrent result model.
- * Designed to be flexible and extensible for multiple providers.
- */
 data class TorrentResult(
     val title: String,
     val magnet: String? = null,
@@ -16,13 +13,39 @@ data class TorrentResult(
     val uploader: String? = null,
     val category: String? = null,
     val provider: String? = null,
-    val extra: Map<String, String> = emptyMap() // catch‑all for provider‑specific fields
-)
+    val hash: String? = null,
+    val uploadDate: String? = null,
+    val extra: Map<String, String> = emptyMap()
+) {
+    companion object {
+        fun fromElement(el: Element, provider: ProviderConfig): TorrentResult {
+            val fields = provider.fields
+            fun fieldText(key: String): String? =
+                fields[key]?.let { sel ->
+                    val nodes = el.select(sel.selector)
+                    if (sel.attr != null) nodes.attr(sel.attr) else nodes.text()
+                }?.takeIf { it.isNotBlank() }
 
-/**
- * Provider definition model.
- * Encapsulates selectors and metadata for scraping/parsing.
- */
+            return TorrentResult(
+                title = fieldText("title") ?: "Unknown Title",
+                magnet = fieldText("magnet"),
+                detailUrl = fieldText("detailUrl"),
+                size = fieldText("size"),
+                seeds = fieldText("seeders")?.toIntOrNull(),
+                leechers = fieldText("leechers")?.toIntOrNull(),
+                uploader = fieldText("uploader"),
+                category = fieldText("category"),
+                provider = provider.name,
+                hash = fieldText("hash"),
+                uploadDate = fieldText("uploadDate"),
+                extra = fields.keys
+                    .filterNot { it in setOf("title","magnet","detailUrl","size","seeders","leechers","uploader","category","hash","uploadDate") }
+                    .associateWith { fieldText(it) ?: "" }
+            )
+        }
+    }
+}
+
 data class ProviderConfig(
     val name: String,
     val searchUrl: String,
@@ -30,18 +53,11 @@ data class ProviderConfig(
     val fields: Map<String, FieldSelector>
 )
 
-/**
- * Field selector definition.
- * Each field can specify a CSS selector and optional attribute.
- */
 data class FieldSelector(
     val selector: String,
     val attr: String? = null
 )
 
-/**
- * Utility to convert JSONObject provider configs into strongly typed ProviderConfig.
- */
 object ProviderConfigFactory {
     fun fromJson(json: JSONObject): ProviderConfig {
         val fieldsJson = json.optJSONObject("fields") ?: JSONObject()
