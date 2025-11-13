@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 scope.launch {
-                    val allResults = mutableListOf<SearchResult>()
+                    val allResults = mutableListOf<TorrentResult>()
                     providerList.forEach { provider ->
                         launch(Dispatchers.IO) {
                             try {
